@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 
 function formatFileSize(bytes) {
@@ -10,24 +10,23 @@ function formatFileSize(bytes) {
 }
 
 
-const list = () => {
+const list = async () => {
     const folder = path.join(__dirname, 'secret-folder');
 
-
-    fs.readdir(folder, { withFileTypes: true }, (err, files) => {
-        if (err)
-            console.log(err);
-        else {
-            files.forEach(file => {
-                if (file.isFile()) {
-                    let extension = path.extname(file.name);
-                    let size = formatFileSize(fs.statSync(path.join(folder, file.name)).size);
-                    console.log(`${path.basename(file.name, extension)} - ${extension.replace('.','')} - ${size}`);
-                }
-            })
+    try {
+        const files = await fs.readdir(folder, { withFileTypes: true });
+        
+        for (const file of files) {
+            if (file.isFile()) {
+                const extension = path.extname(file.name);
+                const stats = await fs.stat(path.join(folder, file.name));
+                const size = formatFileSize(stats.size);
+                console.log(`${path.basename(file.name, extension)} - ${extension.replace('.', '')} - ${size}`);
+            }
         }
-    })
-
+    } catch (err) {
+        console.error(err);
+    }
 };
 
 list();
