@@ -15,7 +15,12 @@ const write = () => {
     const stream = fs.createWriteStream(filePath);
 
     process.stdin.on('data', (chunk) => {
-        stream.write(chunk);
+        const input = chunk.toString().trim();
+        if (input.toLowerCase() === 'exit') {
+            process.exit();
+        } else {
+            stream.write(chunk);
+        }
     });
 };
 
